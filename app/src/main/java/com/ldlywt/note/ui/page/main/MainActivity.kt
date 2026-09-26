@@ -12,11 +12,7 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.ViewCompat
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.lifecycleScope
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.repeatOnLifecycle
 import com.ldlywt.note.backup.cloud.CloudSyncManager
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.isActive
 import com.ldlywt.note.biometric.AppBioMetricManager
 import com.ldlywt.note.biometric.BiometricAuthListener
 import com.ldlywt.note.state.NoteState
@@ -64,13 +60,9 @@ class MainActivity : AppCompatActivity() {
 
     // 提取公共的 setContent 逻辑
     private fun setupContent() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                while (isActive) {
-                    if (cloudSyncManager.autoSync && !cloudSyncManager.busy.value) cloudSyncManager.sync()
-                    delay(60_000)
-                }
-            }
+        // 不再定时同步：打开应用时按设置同步一次，其余由主页下拉手动同步。
+        if (cloudSyncManager.autoSync) {
+            lifecycleScope.launch { cloudSyncManager.sync() }
         }
         setContent {
             SettingsProvider {

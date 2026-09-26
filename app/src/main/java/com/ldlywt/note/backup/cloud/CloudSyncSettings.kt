@@ -59,7 +59,7 @@ fun CloudSyncSettings(viewModel: CloudSyncViewModel = hiltViewModel()) {
                     OutlinedTextField(url, { url = it }, label = { Text("服务地址（公网使用 HTTPS）") }, singleLine = true, modifier = Modifier.fillMaxWidth())
                     OutlinedTextField(token, { token = it }, label = { Text("访问密钥") }, singleLine = true,
                         visualTransformation = PasswordVisualTransformation(), modifier = Modifier.fillMaxWidth())
-                    Text("应用在前台时，每 60 秒自动同步")
+                    Text("打开应用时自动同步一次（主页列表下拉可随时手动同步）")
                     Checkbox(checked = auto, onCheckedChange = { auto = it })
                     if (error.isNotBlank()) Text(error)
                 }

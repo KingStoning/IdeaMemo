@@ -43,6 +43,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -67,9 +68,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.ldlywt.note.R
+import com.ldlywt.note.backup.cloud.CloudSyncViewModel
 import com.ldlywt.note.bean.NoteShowBean
 import com.ldlywt.note.component.NoteCard
 import com.ldlywt.note.component.RYScaffold
@@ -83,6 +86,7 @@ import com.ldlywt.note.utils.SettingsPreferences
 import com.ldlywt.note.utils.SharedPreferencesUtils
 import com.ldlywt.note.utils.lunchMain
 import com.ldlywt.note.utils.str
+import com.ldlywt.note.utils.toast
 import com.moriafly.salt.ui.SaltTheme
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
@@ -92,13 +96,17 @@ import java.io.File
 import java.time.LocalDate
 import java.time.ZoneId
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AllNotePage(
     navController: NavHostController,
     onOpenDrawer: () -> Unit,
     externalShowInputDialog: Boolean = false,
-    onExternalShowInputDialogChange: (Boolean) -> Unit = {}
+    onExternalShowInputDialogChange: (Boolean) -> Unit = {},
+    cloudSyncViewModel: CloudSyncViewModel = hiltViewModel()
 ) {
+    val syncBusy by cloudSyncViewModel.manager.busy.collectAsState()
+    var pullRefreshing by remember { mutableStateOf(false) }
     val noteState: NoteState = LocalMemosState.current
     var showWarnDialog by rememberSaveable { mutableStateOf(false) }
     var parentNoteForComment by rememberSaveable { mutableStateOf<NoteShowBean?>(null) }
@@ -164,7 +172,23 @@ fun AllNotePage(
                 })
             },
             content = {
-                Box(modifier = Modifier.fillMaxSize()) {
+                // 下拉列表手动触发一次云同步
+                PullToRefreshBox(
+                    isRefreshing = pullRefreshing || syncBusy,
+                    onRefresh = {
+                        if (!pullRefreshing) {
+                            pullRefreshing = true
+                            coroutineScope.launch {
+                                try {
+                                    toast(cloudSyncViewModel.manager.sync())
+                                } finally {
+                                    pullRefreshing = false
+                                }
+                            }
+                        }
+                    },
+                    modifier = Modifier.fillMaxSize()
+                ) {
                     if (isGalleryMode) {
                         val galleryNotes = remember(noteState.notes) {
                             noteState.notes.filter { it.note.attachments.isNotEmpty() }
