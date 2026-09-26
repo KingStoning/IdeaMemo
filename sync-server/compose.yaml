@@ -1,0 +1,15 @@
+services:
+  sync:
+    build: .
+    restart: unless-stopped
+    environment:
+      SYNC_TOKEN: ${SYNC_TOKEN:?Set SYNC_TOKEN in .env (at least 32 characters)}
+    ports:
+      - "${SYNC_BIND:-0.0.0.0}:${SYNC_PORT:-8787}:8787"
+    volumes:
+      - ./data:/data
+    read_only: true
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+    mem_limit: 256m
+    pids_limit: 128

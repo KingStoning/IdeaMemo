@@ -126,11 +126,10 @@ class NoteViewModel @Inject constructor(private val tagNoteRepo: TagNoteRepo) : 
 
     fun getNoteShowBeanByIdFlow(noteId: Long): Flow<NoteShowBean?> = tagNoteRepo.getNoteShowBeanByIdFlow(noteId)
 
-    fun insertOrUpdate(note: Note) {
+    fun insertOrUpdate(note: Note) =
         viewModelScope.launch(Dispatchers.IO) {
             tagNoteRepo.insertOrUpdate(note)
         }
-    }
 
 
     fun getNotesOnSelectedDate(selectedDate: LocalDate): List<NoteShowBean> {

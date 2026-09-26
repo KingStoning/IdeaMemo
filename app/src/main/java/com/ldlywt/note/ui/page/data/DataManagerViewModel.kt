@@ -70,7 +70,7 @@ class DataManagerViewModel @Inject constructor(
         notes: List<NoteShowBean>
     ): File = withContext(Dispatchers.IO) {
         val file = File(context.cacheDir, fileName)
-        val uri = FileProvider.getUriForFile(context, "com.ldlywt.note.provider", file)
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", file)
         // 1. 先导出到私有目录
         BackUp.exportHtmlZip(notes, uri)
         file

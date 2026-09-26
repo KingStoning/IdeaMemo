@@ -28,8 +28,7 @@ object DatabaseModule {
 
     private fun buildDatabase(context: Context) =
         Room.databaseBuilder(context.applicationContext, AppDatabase::class.java, DATABASE_NAME)
-            .addMigrations(AppDatabase.MIGRATION_1_2)
-            .fallbackToDestructiveMigration()
+            .addMigrations(AppDatabase.MIGRATION_1_2, AppDatabase.MIGRATION_2_3)
             .addCallback(CALLBACK)
             .build()
 

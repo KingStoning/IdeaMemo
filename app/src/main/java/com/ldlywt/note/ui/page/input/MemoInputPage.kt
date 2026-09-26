@@ -44,6 +44,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -90,6 +91,10 @@ fun MemoInputPage(
     memoId: Long,
     memoInputViewModel: MemoInputViewModel = hiltViewModel(),
 ) {
+    DisposableEffect(memoInputViewModel) {
+        memoInputViewModel.cloudSyncManager.editorOpen = true
+        onDispose { memoInputViewModel.cloudSyncManager.editorOpen = false }
+    }
     val noteState = LocalMemosState.current
     val focusRequester = remember { FocusRequester() }
     val coroutineScope = rememberCoroutineScope()
@@ -143,7 +148,7 @@ fun MemoInputPage(
             this.content = text.text
             this.updateTime = System.currentTimeMillis()
             this.attachments = memoInputViewModel.uploadAttachments.toList()
-            memosViewModel.insertOrUpdate(this)
+            memosViewModel.insertOrUpdate(this).join()
         }
         navController.debouncedPopBackStack()
     }

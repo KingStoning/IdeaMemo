@@ -7,6 +7,11 @@
     <br/>
 </div>
 
+## Windows and self-hosted sync
+
+This fork adds an offline Windows text notebook, Android two-way sync, and a small
+Docker sync service with conflict copies. See the [setup guide](docs/自部署同步.md).
+
 ## 🖌️ Screenshots
 
 <div>

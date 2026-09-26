@@ -12,6 +12,11 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface TagDao {
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
+    fun insertIfAbsent(tag: Tag): Long
+
+    @Query("UPDATE Tag SET count = (SELECT COUNT(*) FROM NoteTagCrossRef WHERE NoteTagCrossRef.tag = Tag.tag)")
+    fun refreshCounts()
     @Transaction
     fun insertOrUpdate(tag: Tag) {
         val oldTag = getByName(tag.tag)
