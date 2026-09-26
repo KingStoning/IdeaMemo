@@ -1,5 +1,6 @@
 *.iml
 .gradle
+.kotlin/
 /local.properties
 /.idea/caches
 /.idea/libraries
@@ -16,3 +17,15 @@ local.properties
 /keystore/
 /keystore/noteKeyStore.jks
 /.idea/
+__pycache__/
+*.pyc
+*.sqlite3
+*.sqlite3-wal
+*.sqlite3-shm
+/desktop/build/
+/desktop/dist/
+/desktop/*.spec
+/sync-server/.env
+/sync-server/data/
+/.build-tools/
+/delivery/

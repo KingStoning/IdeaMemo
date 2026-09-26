@@ -1,0 +1,67 @@
+name: Windows, Android and sync service
+on:
+  workflow_dispatch:
+  push:
+    paths: ['desktop/**', 'sync-server/**', 'tests/**', 'app/**', 'gradle/**', '*.gradle.kts', 'gradle.properties', '.github/workflows/cloud-build.yml']
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: python -m unittest discover -s tests -v
+      - run: python -m pip install -r desktop/requirements-build.txt
+      - shell: pwsh
+        run: ./desktop/build.ps1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: IdeaMemo-Windows-x64
+          path: desktop/dist/IdeaMemo.exe
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platform-tools platforms;android-36 build-tools;34.0.0'
+          log-accepted-android-sdk-licenses: false
+      - uses: gradle/actions/setup-gradle@v4
+      - run: bash gradlew :app:assembleDebug --stacktrace
+      - uses: actions/upload-artifact@v4
+        with:
+          name: IdeaMemo-Android-cloud-dev
+          path: app/build/outputs/apk/debug/*.apk
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: docker build -t ideamemo-sync:test sync-server
+      - name: Check container authentication and persistence
+        shell: bash
+        run: |
+          set -euo pipefail
+          token="$(openssl rand -hex 32)"
+          docker run -d --name sync --read-only --cap-drop ALL --security-opt no-new-privileges:true -p 127.0.0.1:8787:8787 -v sync-test:/data -e SYNC_TOKEN="$token" ideamemo-sync:test
+          trap 'docker rm -f sync' EXIT
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8787/health; then break; fi
+            sleep 1
+          done
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://127.0.0.1:8787/v1/info)" = 401
+          before="$(curl -fsS -H "Authorization: Bearer $token" http://127.0.0.1:8787/v1/info)"
+          docker restart sync
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8787/health; then break; fi
+            sleep 1
+          done
+          after="$(curl -fsS -H "Authorization: Bearer $token" http://127.0.0.1:8787/v1/info)"
+          test "$before" = "$after"

@@ -1,10 +1,9 @@
 pluginManagement {
     repositories {
-        maven("https://maven.aliyun.com/repository/gradle-plugin/")
-        maven("https://www.jitpack.io/")
         google()
         mavenCentral()
         gradlePluginPortal()
+        maven("https://maven.aliyun.com/repository/gradle-plugin/")
     }
 }
 plugins {
@@ -13,11 +12,13 @@ plugins {
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
-        maven("https://maven.aliyun.com/repository/public/")
-        maven("https://maven.aliyun.com/repository/google/")
-        maven("https://jitpack.io")
         google()
         mavenCentral()
+        maven("https://jitpack.io") {
+            content { includeGroupByRegex("com\\.github\\..*") }
+        }
+        maven("https://maven.aliyun.com/repository/public/")
+        maven("https://maven.aliyun.com/repository/google/")
     }
 }
 

@@ -45,30 +45,20 @@ android {
     }
 
     signingConfigs {
-        create("release") {
-
-            //加载资源
-            val properties = Properties()
-            val inputStream = project.rootProject.file("local.properties").inputStream()
-            properties.load(inputStream)
-
-            //读取文件
-            val sdkDir = properties.getProperty("key.file")
-            storeFile = file(sdkDir)
-
-            //读取字段
-            val key_keyAlias = properties.getProperty("keyAlias")
-            val key_keyPassword = properties.getProperty("keyPassword")
-            val key_storePassword = properties.getProperty("storePassword")
-
-            storePassword = key_storePassword
-            keyAlias = key_keyAlias
-            keyPassword = key_keyPassword
-
-            enableV1Signing = true
-            enableV2Signing = true
-            enableV3Signing = true
-            enableV4Signing = true
+        val properties = Properties()
+        val local = project.rootProject.file("local.properties")
+        if (local.exists()) local.inputStream().use { properties.load(it) }
+        if (!properties.getProperty("key.file").isNullOrBlank()) {
+            create("release") {
+                storeFile = file(properties.getProperty("key.file"))
+                storePassword = properties.getProperty("storePassword")
+                keyAlias = properties.getProperty("keyAlias")
+                keyPassword = properties.getProperty("keyPassword")
+                enableV1Signing = true
+                enableV2Signing = true
+                enableV3Signing = true
+                enableV4Signing = true
+            }
         }
     }
 
@@ -90,7 +80,8 @@ android {
         debug {
             isShrinkResources = false
             isMinifyEnabled = false
-            signingConfig = signingConfigs.findByName("release")
+            applicationIdSuffix = ".clouddev"
+            versionNameSuffix = "-cloud-dev"
         }
 
     }

@@ -6,6 +6,9 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.ldlywt.note.backup.cloud.CloudSyncSettings
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -189,6 +192,7 @@ fun DataManagerPage(
         modifier = Modifier
             .fillMaxSize()
             .background(color = SaltTheme.colors.background)
+            .verticalScroll(rememberScrollState())
     ) {
 
         Spacer(modifier = Modifier.height(30.dp))
@@ -209,6 +213,8 @@ fun DataManagerPage(
                 )
             }
         }
+
+        CloudSyncSettings()
 
         if (webInputDialog) {
             AccountInputDialog(
